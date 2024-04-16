@@ -1,8 +1,7 @@
 #include "ScalarConverter.hpp"
-#include <cctype>
 
 ScalarConverter::ScalarConverter()
-	: _char(-1), _int(-1), _float(-1), _isDigit(-1) {
+	: _char(0), _int(0), _float(0), _isDigit(false) {
 	std::cout << "ScalarConverter Constructor called"
 			  << std::endl;
 }
@@ -17,21 +16,20 @@ void ScalarConverter::display_char(std::string to_convert) {
 		std::cout << "char: impossible" << std::endl;
 		return;
 	}
-	// From 65 -> A
-	int new_char = std::atoi((to_convert).c_str());
-	if (new_char >= MIN_ASCII_VALUE
-		&& new_char <= MAX_ASCII_VALUE) {
-		_char = static_cast<char>(new_char);
-		std::cout << "char: " << _char << std::endl;
-		return;
+	int int_value = 0;
+	if (!_isDigit && to_convert.length() == 1) {
+		int_value = to_convert[0];
+	} else {
+		int_value = std::atoi(to_convert.c_str());
+		if (int_value < MIN_ASCII_VALUE
+			|| int_value > MAX_ASCII_VALUE) {
+			_char = -1;
+			std::cout << "char: Non displayable" << std::endl;
+			return;
+		}
 	}
-	// From A -> 65
-	if (_isDigit) {
-		_char = to_convert[0];
-		std::cout << "char: " << (int)_char << std::endl;
-		return;
-	}
-	std::cout << "char: Non displayable" << std::endl;
+	_char = static_cast<char>(int_value);
+	std::cout << "char: '" << _char << "'" << std::endl;
 }
 
 void ScalarConverter::display_int(std::string to_convert) {
@@ -40,9 +38,15 @@ void ScalarConverter::display_int(std::string to_convert) {
 		return;
 	}
 	int new_int = std::atoi((to_convert).c_str());
-	if (new_int == INT_MAX) {
+	if (new_int >= std::numeric_limits<int>::max()) {
 		std::cout << "int: Number to convert is too big"
 				  << std::endl;
+		return;
+	}
+	if (!_isDigit && to_convert.length() == 1) {
+		new_int = static_cast<int>(to_convert[0]);
+	} else if (!_isDigit && to_convert.length() > 1) {
+		std::cout << "int: Non displayable" << std::endl;
 		return;
 	}
 	_int = new_int;
@@ -52,6 +56,12 @@ void ScalarConverter::display_int(std::string to_convert) {
 void ScalarConverter::display_float(std::string to_convert) {
 	if (to_convert == "nan") {
 		std::cout << "float: nanf" << std::endl;
+		return;
+	}
+	if (_isDigit) {
+		_float = to_convert[0];
+		std::cout << "float: " << (float)_float << "f"
+				  << std::endl;
 		return;
 	}
 	float new_float = std::atof((to_convert).c_str());
@@ -67,8 +77,7 @@ void ScalarConverter::display_float(std::string to_convert) {
 void ScalarConverter::convert(std::string to_convert) {
 	ScalarConverter converter;
 
-	if (!(isdigit(std::atoi((to_convert).c_str())) != 0)
-		&& to_convert.length() == 1) {
+	if ((isdigit(to_convert[0]) != 0)) {
 		converter._isDigit = true;
 	}
 

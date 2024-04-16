@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-#include <limits.h>
+#include <limits>
 #include <math.h>
 
 const int MIN_ASCII_VALUE = 32;
