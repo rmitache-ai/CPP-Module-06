@@ -135,6 +135,7 @@ void ScalarConverter::displayDouble(
 	outputWithDecimal(to_convert, DISPLAY_AS_DOUBLE, _isDigit);
 }
 
+// TODO: inf, detect which type is passed, then call the others inside those. CHECK SUBJECT FILE
 void ScalarConverter::convert(std::string to_convert) {
 	ScalarConverter converter;
 
