@@ -1,5 +1,6 @@
 #include "ScalarConverter.hpp"
 
+#include <cmath>
 #include <limits>
 #include <math.h>
 #include <string>
@@ -59,19 +60,25 @@ void ScalarConverter::displayInt(std::string to_convert) {
 	std::cout << "int: " << _int << std::endl;
 }
 
-static void outputWithDecimal(std::string input) {
-	float              f = NAN;
-	std::istringstream from_str;
-	from_str.str(input);
-	from_str >> f;
+void outputWithDecimal(std::string input, bool displayAs) {
+	double             result = NAN;
+	std::istringstream from_str(input);
+	from_str >> result;
 	size_t      dotIndex = input.find('.');
 	std::string afterDot
 		= input.substr(dotIndex + 1, std::string::npos);
 	size_t length = afterDot.length();
-
-	std::cout << std::fixed
-			  << std::setprecision(static_cast<int>(--length))
-			  << "float: " << f << 'f' << std::endl;
+	if (afterDot.substr(length - 1) == "f") {
+		length--;
+	}
+	if (static_cast<int>(displayAs) == DISPLAY_AS_FLOAT) {
+		float f_new = static_cast<float>(result);
+		std::cout << std::fixed << std::setprecision(length)
+				  << "float: " << f_new << 'f' << std::endl;
+	} else {
+		std::cout << std::fixed << std::setprecision(length)
+				  << "double: " << result << std::endl;
+	}
 }
 
 void ScalarConverter::displayFloat(std::string to_convert) {
@@ -80,8 +87,7 @@ void ScalarConverter::displayFloat(std::string to_convert) {
 		return;
 	}
 	float new_float = std::atof((to_convert).c_str());
-	if (new_float >= std::numeric_limits<float>::max()
-		|| new_float <= std::numeric_limits<float>::min()) {
+	if (new_float >= MAXFLOAT || new_float <= -MAXFLOAT) {
 		std::cout
 			<< "float: Number to convert is too big or too small"
 			<< std::endl;
@@ -94,7 +100,7 @@ void ScalarConverter::displayFloat(std::string to_convert) {
 		return;
 	}
 	_float = new_float;
-	outputWithDecimal(to_convert);
+	outputWithDecimal(to_convert, DISPLAY_AS_FLOAT);
 }
 
 void ScalarConverter::displayDouble(std::string to_convert) {
@@ -104,7 +110,7 @@ void ScalarConverter::displayDouble(std::string to_convert) {
 	}
 	double new_double = std::atof((to_convert).c_str());
 	if (new_double >= std::numeric_limits<double>::max()
-		|| new_double <= std::numeric_limits<double>::min()) {
+		|| new_double <= -std::numeric_limits<double>::max()) {
 		std::cout << "double: Number to convert is too big or "
 					 "too small"
 				  << std::endl;
@@ -117,13 +123,17 @@ void ScalarConverter::displayDouble(std::string to_convert) {
 		return;
 	}
 	_double = new_double;
-	outputWithDecimal(to_convert);
+	outputWithDecimal(to_convert, DISPLAY_AS_DOUBLE);
 }
 
 void ScalarConverter::convert(std::string to_convert) {
 	ScalarConverter converter;
 
-	if ((isdigit(to_convert[0]) != 0)) {
+	int i = 0;
+	if (to_convert[i] == '-') {
+		i++;
+	}
+	if ((isdigit(to_convert[i]) != 0)) {
 		converter._isDigit = true;
 	}
 

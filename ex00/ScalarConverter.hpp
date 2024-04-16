@@ -12,6 +12,8 @@
 
 const int MIN_ASCII_VALUE = 32;
 const int MAX_ASCII_VALUE = 126;
+#define DISPLAY_AS_DOUBLE true
+#define DISPLAY_AS_FLOAT false
 
 class ScalarConverter {
 private:
