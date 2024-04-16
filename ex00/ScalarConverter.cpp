@@ -1,4 +1,7 @@
 #include "ScalarConverter.hpp"
+
+#include <limits>
+#include <math.h>
 #include <string>
 
 ScalarConverter::ScalarConverter()
@@ -39,9 +42,11 @@ void ScalarConverter::displayInt(std::string to_convert) {
 		return;
 	}
 	int new_int = std::atoi((to_convert).c_str());
-	if (new_int >= std::numeric_limits<int>::max()) {
-		std::cout << "int: Number to convert is too big"
-				  << std::endl;
+	if (new_int >= std::numeric_limits<int>::max()
+		|| new_int <= std::numeric_limits<int>::min()) {
+		std::cout
+			<< "int: Number to convert is too big or too small"
+			<< std::endl;
 		return;
 	}
 	if (!_isDigit && to_convert.length() == 1) {
@@ -54,37 +59,32 @@ void ScalarConverter::displayInt(std::string to_convert) {
 	std::cout << "int: " << _int << std::endl;
 }
 
-static void outputWithDecimal(float passedFloat) {
-	std::stringstream ss;
-	ss << passedFloat;
-	std::string floatString = ss.str();
-	double      floatArray[2];
+static void outputWithDecimal(std::string input) {
+	float              f = NAN;
+	std::istringstream from_str;
+	from_str.str(input);
+	from_str >> f;
+	size_t      dotIndex = input.find('.');
+	std::string afterDot
+		= input.substr(dotIndex + 1, std::string::npos);
+	size_t length = afterDot.length();
 
-	size_t pos = floatString.find('.');
-	if (pos != std::string::npos) {
-		std::string intPart        = floatString.substr(0, pos);
-		std::string fracPart       = floatString.substr(pos + 1);
-		double      integerPart    = atof(intPart.c_str());
-		double      fractionalPart = atof(fracPart.c_str());
-		floatArray[0]              = integerPart;
-		floatArray[1]              = fractionalPart;
-	} else {
-		floatArray[0] = passedFloat;
-		floatArray[1] = 0.0;
-	}
-	std::cout << "float: " << floatArray[0] << "."
-			  << floatArray[1] << "f" << std::endl;
+	std::cout << std::fixed
+			  << std::setprecision(static_cast<int>(--length))
+			  << "float: " << f << 'f' << std::endl;
 }
 
 void ScalarConverter::displayFloat(std::string to_convert) {
 	if (to_convert == "nan") {
-		std::cout << "float: impossible" << std::endl;
+		std::cout << "float: nanf" << std::endl;
 		return;
 	}
 	float new_float = std::atof((to_convert).c_str());
-	if (new_float >= std::numeric_limits<float>::max()) {
-		std::cout << "int: Number to convert is too big"
-				  << std::endl;
+	if (new_float >= std::numeric_limits<float>::max()
+		|| new_float <= std::numeric_limits<float>::min()) {
+		std::cout
+			<< "float: Number to convert is too big or too small"
+			<< std::endl;
 		return;
 	}
 	if (!_isDigit && to_convert.length() == 1) {
@@ -94,10 +94,31 @@ void ScalarConverter::displayFloat(std::string to_convert) {
 		return;
 	}
 	_float = new_float;
-	outputWithDecimal(_float);
+	outputWithDecimal(to_convert);
 }
 
-void ScalarConverter::displayDouble(std::string to_convert) {}
+void ScalarConverter::displayDouble(std::string to_convert) {
+	if (to_convert == "nan") {
+		std::cout << "double: nan" << std::endl;
+		return;
+	}
+	double new_double = std::atof((to_convert).c_str());
+	if (new_double >= std::numeric_limits<double>::max()
+		|| new_double <= std::numeric_limits<double>::min()) {
+		std::cout << "double: Number to convert is too big or "
+					 "too small"
+				  << std::endl;
+		return;
+	}
+	if (!_isDigit && to_convert.length() == 1) {
+		new_double = static_cast<double>(to_convert[0]);
+	} else if (!_isDigit && to_convert.length() > 1) {
+		std::cout << "double: Non displayable" << std::endl;
+		return;
+	}
+	_double = new_double;
+	outputWithDecimal(to_convert);
+}
 
 void ScalarConverter::convert(std::string to_convert) {
 	ScalarConverter converter;
