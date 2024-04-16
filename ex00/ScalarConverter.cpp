@@ -1,4 +1,5 @@
 #include "ScalarConverter.hpp"
+#include <string>
 
 ScalarConverter::ScalarConverter()
 	: _char(0), _int(0), _float(0), _isDigit(false) {
@@ -11,7 +12,7 @@ ScalarConverter::~ScalarConverter() {
 			  << std::endl;
 }
 
-void ScalarConverter::display_char(std::string to_convert) {
+void ScalarConverter::displayChar(std::string to_convert) {
 	if (to_convert == "nan") {
 		std::cout << "char: impossible" << std::endl;
 		return;
@@ -32,7 +33,7 @@ void ScalarConverter::display_char(std::string to_convert) {
 	std::cout << "char: '" << _char << "'" << std::endl;
 }
 
-void ScalarConverter::display_int(std::string to_convert) {
+void ScalarConverter::displayInt(std::string to_convert) {
 	if (to_convert == "nan") {
 		std::cout << "int: impossible" << std::endl;
 		return;
@@ -53,26 +54,50 @@ void ScalarConverter::display_int(std::string to_convert) {
 	std::cout << "int: " << _int << std::endl;
 }
 
-void ScalarConverter::display_float(std::string to_convert) {
-	if (to_convert == "nan") {
-		std::cout << "float: nanf" << std::endl;
-		return;
+static void outputWithDecimal(float passedFloat) {
+	std::stringstream ss;
+	ss << passedFloat;
+	std::string floatString = ss.str();
+	double      floatArray[2];
+
+	size_t pos = floatString.find('.');
+	if (pos != std::string::npos) {
+		std::string intPart        = floatString.substr(0, pos);
+		std::string fracPart       = floatString.substr(pos + 1);
+		double      integerPart    = atof(intPart.c_str());
+		double      fractionalPart = atof(fracPart.c_str());
+		floatArray[0]              = integerPart;
+		floatArray[1]              = fractionalPart;
+	} else {
+		floatArray[0] = passedFloat;
+		floatArray[1] = 0.0;
 	}
-	if (_isDigit) {
-		_float = to_convert[0];
-		std::cout << "float: " << (float)_float << "f"
-				  << std::endl;
+	std::cout << "float: " << floatArray[0] << "."
+			  << floatArray[1] << "f" << std::endl;
+}
+
+void ScalarConverter::displayFloat(std::string to_convert) {
+	if (to_convert == "nan") {
+		std::cout << "float: impossible" << std::endl;
 		return;
 	}
 	float new_float = std::atof((to_convert).c_str());
-	if (new_float >= MAXFLOAT) {
-		std::cout << "float: Number to convert is too big"
+	if (new_float >= std::numeric_limits<float>::max()) {
+		std::cout << "int: Number to convert is too big"
 				  << std::endl;
 		return;
 	}
+	if (!_isDigit && to_convert.length() == 1) {
+		new_float = static_cast<float>(to_convert[0]);
+	} else if (!_isDigit && to_convert.length() > 1) {
+		std::cout << "float: Non displayable" << std::endl;
+		return;
+	}
 	_float = new_float;
-	std::cout << "float: " << _float << "f" << std::endl;
+	outputWithDecimal(_float);
 }
+
+void ScalarConverter::displayDouble(std::string to_convert) {}
 
 void ScalarConverter::convert(std::string to_convert) {
 	ScalarConverter converter;
@@ -81,8 +106,8 @@ void ScalarConverter::convert(std::string to_convert) {
 		converter._isDigit = true;
 	}
 
-	converter.display_char(to_convert);
-	converter.display_int(to_convert);
-	converter.display_float(to_convert);
-	// std::cout << display_double(to_convert) << std::endl;
+	converter.displayChar(to_convert);
+	converter.displayInt(to_convert);
+	converter.displayFloat(to_convert);
+	converter.displayDouble(to_convert);
 }
