@@ -17,20 +17,16 @@ const int MAX_ASCII_VALUE = 126;
 
 class ScalarConverter {
 private:
-	char   _char;
-	int    _int;
-	float  _float;
-	double _double;
-	bool   _isDigit;
+	bool _isDigit;
+	ScalarConverter();
 
 public:
-	ScalarConverter();
 	~ScalarConverter();
 
-	void displayChar(std::string to_convert);
-	void displayInt(std::string to_convert);
-	void displayFloat(std::string to_convert);
-	void displayDouble(std::string to_convert);
+	void displayChar(std::string to_convert) const;
+	void displayInt(std::string to_convert) const;
+	void displayFloat(std::string to_convert) const;
+	void displayDouble(std::string to_convert) const;
 
 	static void convert(std::string to_convert);
 

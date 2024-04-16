@@ -6,7 +6,7 @@
 #include <string>
 
 ScalarConverter::ScalarConverter()
-	: _char(0), _int(0), _float(0), _isDigit(false) {
+	: _isDigit(false) {
 	std::cout << "ScalarConverter Constructor called"
 			  << std::endl;
 }
@@ -16,7 +16,7 @@ ScalarConverter::~ScalarConverter() {
 			  << std::endl;
 }
 
-void ScalarConverter::displayChar(std::string to_convert) {
+void ScalarConverter::displayChar(std::string to_convert) const {
 	if (to_convert == "nan") {
 		std::cout << "char: impossible" << std::endl;
 		return;
@@ -28,16 +28,15 @@ void ScalarConverter::displayChar(std::string to_convert) {
 		int_value = std::atoi(to_convert.c_str());
 		if (int_value < MIN_ASCII_VALUE
 			|| int_value > MAX_ASCII_VALUE) {
-			_char = -1;
 			std::cout << "char: Non displayable" << std::endl;
 			return;
 		}
 	}
-	_char = static_cast<char>(int_value);
-	std::cout << "char: '" << _char << "'" << std::endl;
+	std::cout << "char: '" << static_cast<char>(int_value) << "'"
+			  << std::endl;
 }
 
-void ScalarConverter::displayInt(std::string to_convert) {
+void ScalarConverter::displayInt(std::string to_convert) const {
 	if (to_convert == "nan") {
 		std::cout << "int: impossible" << std::endl;
 		return;
@@ -56,32 +55,43 @@ void ScalarConverter::displayInt(std::string to_convert) {
 		std::cout << "int: Non displayable" << std::endl;
 		return;
 	}
-	_int = new_int;
-	std::cout << "int: " << _int << std::endl;
+	std::cout << "int: " << new_int << std::endl;
 }
 
-void outputWithDecimal(std::string input, bool displayAs) {
+void outputWithDecimal(std::string input, bool displayAs,
+					   bool isDigit) {
+
 	double             result = NAN;
 	std::istringstream from_str(input);
-	from_str >> result;
+	if (!isDigit && input.length() == 1) {
+		result = static_cast<double>(input[0]);
+	} else {
+		from_str >> result;
+	}
 	size_t      dotIndex = input.find('.');
-	std::string afterDot
-		= input.substr(dotIndex + 1, std::string::npos);
-	size_t length = afterDot.length();
-	if (afterDot.substr(length - 1) == "f") {
-		length--;
+	std::string afterDot;
+	size_t      length = 1;
+	if (dotIndex != std::string::npos) {
+		afterDot = input.substr(dotIndex + 1);
+		length   = afterDot.length();
+		if (afterDot[length - 1] == 'f') {
+			length--;
+		}
 	}
 	if (static_cast<int>(displayAs) == DISPLAY_AS_FLOAT) {
 		float f_new = static_cast<float>(result);
-		std::cout << std::fixed << std::setprecision(length)
+		std::cout << std::fixed
+				  << std::setprecision(static_cast<int>(length))
 				  << "float: " << f_new << 'f' << std::endl;
 	} else {
-		std::cout << std::fixed << std::setprecision(length)
+		std::cout << std::fixed
+				  << std::setprecision(static_cast<int>(length))
 				  << "double: " << result << std::endl;
 	}
 }
 
-void ScalarConverter::displayFloat(std::string to_convert) {
+void ScalarConverter::displayFloat(
+	std::string to_convert) const {
 	if (to_convert == "nan") {
 		std::cout << "float: nanf" << std::endl;
 		return;
@@ -99,11 +109,11 @@ void ScalarConverter::displayFloat(std::string to_convert) {
 		std::cout << "float: Non displayable" << std::endl;
 		return;
 	}
-	_float = new_float;
-	outputWithDecimal(to_convert, DISPLAY_AS_FLOAT);
+	outputWithDecimal(to_convert, DISPLAY_AS_FLOAT, _isDigit);
 }
 
-void ScalarConverter::displayDouble(std::string to_convert) {
+void ScalarConverter::displayDouble(
+	std::string to_convert) const {
 	if (to_convert == "nan") {
 		std::cout << "double: nan" << std::endl;
 		return;
@@ -122,21 +132,19 @@ void ScalarConverter::displayDouble(std::string to_convert) {
 		std::cout << "double: Non displayable" << std::endl;
 		return;
 	}
-	_double = new_double;
-	outputWithDecimal(to_convert, DISPLAY_AS_DOUBLE);
+	outputWithDecimal(to_convert, DISPLAY_AS_DOUBLE, _isDigit);
 }
 
 void ScalarConverter::convert(std::string to_convert) {
 	ScalarConverter converter;
 
-	int i = 0;
-	if (to_convert[i] == '-') {
-		i++;
+	int count = 0;
+	if (to_convert[count] == '-') {
+		count++;
 	}
-	if ((isdigit(to_convert[i]) != 0)) {
+	if ((isdigit(to_convert[count]) != 0)) {
 		converter._isDigit = true;
 	}
-
 	converter.displayChar(to_convert);
 	converter.displayInt(to_convert);
 	converter.displayFloat(to_convert);
