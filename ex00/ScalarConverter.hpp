@@ -40,8 +40,11 @@ public:
 
 	float getFloat() const;
 	void  setType(std::string to_convert);
-
-	int getType() const;
+	void  checkIfDigit(std::string to_convert);
+	bool  specialCases(std::string to_convert);
+	bool  checkFloatNanInff(std::string to_convert) const;
+	bool  checkDoubleNanInf(std::string to_convert) const;
+	int   getType() const;
 };
 
 std::ostream& operator<<(std::ostream&          out,

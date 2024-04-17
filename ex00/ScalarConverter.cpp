@@ -1,5 +1,10 @@
 #include "ScalarConverter.hpp"
 
+#include <cmath>
+#include <limits>
+#include <math.h>
+#include <string>
+
 ScalarConverter::ScalarConverter()
 	: _isDigit(false), _type() {
 	std::cout << "ScalarConverter Constructor called"
@@ -32,31 +37,25 @@ std::ostream& operator<<(std::ostream&          out,
 }
 
 void ScalarConverter::displayChar(std::string to_convert) const {
-	if (to_convert == "nan") {
-		std::cout << "char: impossible" << std::endl;
-		return;
-	}
 	int char_value = 0;
 	if (!_isDigit && to_convert.length() == 1) {
 		char_value = to_convert[0];
-	} else if (!_isDigit && to_convert.length() != 1) {
+	} else if (!_isDigit && to_convert.length() != 1
+			   && (to_convert.find_first_of('+', 1) == 0U)) {
 		std::cout << "char: Non displayable" << std::endl;
-		return;
 	} else {
 		char_value = std::atoi(to_convert.c_str());
-		if (char_value < MIN_ASCII_VALUE
-			|| char_value > MAX_ASCII_VALUE) {
-			std::cout << "char: Non displayable" << std::endl;
-			return;
-		}
 	}
-	std::cout << "char: '" << static_cast<char>(char_value)
-			  << "'" << std::endl;
+	if (char_value > MIN_ASCII_VALUE
+		&& char_value < MAX_ASCII_VALUE) {
+		std::cout << "char: '" << static_cast<char>(char_value)
+				  << "'" << std::endl;
+	} else {
+		std::cout << "char: Non displayable" << std::endl;
+	}
 	int    castedToInt    = static_cast<int>(char_value);
 	float  castedToFloat  = static_cast<float>(castedToInt);
 	double castedToDouble = static_cast<double>(castedToFloat);
-	std::cout << "char: "
-			  << "'" << char_value << "'" << std::endl;
 	std::cout << "int: " << castedToInt << std::endl;
 	std::cout << "float: " << std::fixed << std::setprecision(1)
 			  << castedToFloat << 'f' << std::endl;
@@ -64,10 +63,6 @@ void ScalarConverter::displayChar(std::string to_convert) const {
 }
 
 void ScalarConverter::displayInt(std::string to_convert) const {
-	if (to_convert == "nan") {
-		std::cout << "int: impossible" << std::endl;
-		return;
-	}
 	long new_int = std::atol(to_convert.c_str());
 	if (new_int > std::numeric_limits<int>::max()
 		|| new_int < -std::numeric_limits<int>::max()) {
@@ -95,10 +90,70 @@ void ScalarConverter::displayInt(std::string to_convert) const {
 	std::cout << "double: " << castedToDouble << std::endl;
 }
 
+bool ScalarConverter::checkFloatNanInff(
+	std::string to_convert) const {
+
+	float result = 0;
+	if (to_convert == "nanf") {
+		result = nanf("");
+		std::cout << "char: "
+				  << "impossible" << std::endl;
+		std::cout << "int: "
+				  << "impossible" << std::endl;
+		std::cout << "float: " << result << 'f' << std::endl;
+		std::cout << "double: " << static_cast<double>(result)
+				  << std::endl;
+		return true;
+	}
+	if (to_convert == "-inff" || to_convert == "+inff"
+		|| to_convert == "inff") {
+		result = std::numeric_limits<float>::infinity();
+		std::cout << "char: "
+				  << "impossible" << std::endl;
+		std::cout << "int: "
+				  << "impossible" << std::endl;
+		std::cout << "float: " << result << 'f' << std::endl;
+		std::cout << "double: " << static_cast<double>(result)
+				  << std::endl;
+		return true;
+	}
+	return false;
+}
+
+bool ScalarConverter::checkDoubleNanInf(
+	std::string to_convert) const {
+
+	double result = 0;
+	if (to_convert == "nan") {
+		result = nanf("");
+		std::cout << "char: "
+				  << "impossible" << std::endl;
+		std::cout << "int: "
+				  << "impossible" << std::endl;
+		std::cout << "float: " << static_cast<float>(result)
+				  << 'f' << std::endl;
+		std::cout << "double: " << result << std::endl;
+		return true;
+	}
+	if (to_convert == "-inf" || to_convert == "+inf"
+		|| to_convert == "inf") {
+		result = std::numeric_limits<float>::infinity();
+		std::cout << "char: "
+				  << "impossible" << std::endl;
+		std::cout << "int: "
+				  << "impossible" << std::endl;
+		std::cout << "float: " << static_cast<float>(result)
+				  << 'f' << std::endl;
+		std::cout << "double: " << result << std::endl;
+		return true;
+	}
+	return false;
+}
+
 void ScalarConverter::displayFloat(
 	std::string to_convert) const {
-	if (to_convert == "nan") {
-		std::cout << "float: nanf" << std::endl;
+
+	if (checkFloatNanInff(to_convert)) {
 		return;
 	}
 	float new_float = std::atof((to_convert).c_str());
@@ -140,8 +195,7 @@ void ScalarConverter::displayFloat(
 
 void ScalarConverter::displayDouble(
 	std::string to_convert) const {
-	if (to_convert == "nan") {
-		std::cout << "double: nan" << std::endl;
+	if (static_cast<bool>(checkDoubleNanInf(to_convert))) {
 		return;
 	}
 	double new_double = strtod(to_convert.c_str(), NULL);
@@ -195,55 +249,62 @@ size_t decimalCount(std::string to_convert) {
 	return d_count;
 }
 
-void ScalarConverter::setType(std::string to_convert) {
-
+bool ScalarConverter::specialCases(std::string to_convert) {
 	if (decimalCount(to_convert) > 1) {
 		std::cout << "Multiple decimal points found\n";
+		_type = -1;
+		return true;
+	}
+	return false;
+}
+
+void ScalarConverter::setType(std::string to_convert) {
+
+	if (specialCases(to_convert)) {
 		_type = -1;
 		return;
 	}
 	if (!_isDigit && to_convert.length() == 1) {
 		_type = 0;
-		std::cout << "Calling char\n";
 		return;
 	}
 	if (_isDigit
 		&& (to_convert.find(".") == std::string::npos)) {
 		_type = 1;
-		std::cout << "Calling int\n";
 		return;
 	}
-	if (to_convert.find("f") != std::string::npos) {
+	if ((to_convert.find("f") != std::string::npos
+		 && to_convert.find(".") != std::string::npos)
+		|| to_convert == "nanf" || to_convert == "inff"
+		|| to_convert == "-inff" || to_convert == "+inff") {
 		_type = 2;
-		std::cout << "float found\n";
 		return;
 	}
-	if (to_convert.find(".") != std::string::npos
-		&& to_convert.find("f") == std::string::npos) {
+	if ((to_convert.find(".") != std::string::npos
+		 && to_convert.find("f") == std::string::npos)
+		|| to_convert == "nan" || to_convert == "inf"
+		|| to_convert == "-inf" || to_convert == "+inf") {
 		_type = 3;
-		std::cout << "Calling double\n";
 		return;
 	}
-	std::cout << to_convert
-			  << ", cannot be converted since is neither "
-				 "char, int, float or double! "
-			  << std::endl;
 	_type = -1;
 }
 
-// TODO: inf, detect which type is passed, then call the others inside those. CHECK SUBJECT FILE
-void ScalarConverter::convert(std::string to_convert) {
-	ScalarConverter converter;
-
+void ScalarConverter::checkIfDigit(std::string to_convert) {
 	int count = 0;
-	if (to_convert[count] == '-') {
+	if (to_convert[count] == '-' || to_convert[count] == '+') {
 		count++;
 	}
 	if ((isdigit(to_convert[count]) != 0)) {
-		converter._isDigit = true;
+		ScalarConverter::_isDigit = true;
 	}
+}
+
+void ScalarConverter::convert(std::string to_convert) {
+	ScalarConverter converter;
+
+	converter.checkIfDigit(to_convert);
 	converter.setType(to_convert);
-	std::cout << converter.getType() << std::endl;
 	switch (converter._type) {
 	case 0:
 		converter.displayChar(to_convert);
@@ -258,6 +319,9 @@ void ScalarConverter::convert(std::string to_convert) {
 		converter.displayDouble(to_convert);
 		break;
 	default:
-		break;
+		std::cout << to_convert
+				  << ", cannot be converted since is neither "
+					 "char, int, float or double! "
+				  << std::endl;
 	}
 }
