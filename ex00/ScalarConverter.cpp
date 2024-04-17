@@ -243,15 +243,27 @@ void ScalarConverter::displayDouble(
 			  << "double: " << new_double << std::endl;
 }
 
-size_t decimalCount(std::string to_convert) {
-	size_t d_count
-		= std::count(to_convert.begin(), to_convert.end(), '.');
+size_t countValue(std::string to_convert, char value) {
+	size_t d_count = std::count(to_convert.begin(),
+								to_convert.end(), value);
 	return d_count;
 }
 
 bool ScalarConverter::specialCases(std::string to_convert) {
-	if (decimalCount(to_convert) > 1) {
+	if (countValue(to_convert, '.') > 1) {
 		std::cout << "Multiple decimal points found\n";
+		_type = -1;
+		return true;
+	}
+	if (countValue(to_convert, 'f') > 1) {
+		std::cout << "Multiple floating points found\n";
+		_type = -1;
+		return true;
+	}
+	if (to_convert[to_convert.length() - 1] == '.') {
+		std::cout << "Error: Double needs to have a number "
+					 "after dot."
+				  << std::endl;
 		_type = -1;
 		return true;
 	}
