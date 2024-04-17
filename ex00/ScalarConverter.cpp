@@ -1,5 +1,4 @@
 #include "ScalarConverter.hpp"
-#include <cstddef>
 
 ScalarConverter::ScalarConverter()
 	: _isDigit(false), _type() {
@@ -70,8 +69,8 @@ void ScalarConverter::displayInt(std::string to_convert) const {
 		return;
 	}
 	long new_int = std::atol(to_convert.c_str());
-	if (new_int >= std::numeric_limits<int>::max()
-		|| new_int <= std::numeric_limits<int>::min()) {
+	if (new_int > std::numeric_limits<int>::max()
+		|| new_int < -std::numeric_limits<int>::max()) {
 		std::cout << "int: Number out of Range" << std::endl;
 		return;
 	}
@@ -104,9 +103,7 @@ void ScalarConverter::displayFloat(
 	}
 	float new_float = std::atof((to_convert).c_str());
 	if (new_float >= MAXFLOAT || new_float <= -MAXFLOAT) {
-		std::cout << "float: Number to convert is too big "
-					 "or too small"
-				  << std::endl;
+		std::cout << "float: Out of Range" << std::endl;
 		return;
 	}
 	double             result = NAN;
@@ -123,8 +120,18 @@ void ScalarConverter::displayFloat(
 	int    castedToInt    = static_cast<int>(result);
 	char   castedToChar   = static_cast<char>(castedToInt);
 	double castedToDouble = static_cast<double>(result);
-	printCahr(castedToInt, castedToChar);
-	printInt(static_cast<long>(f), castedToInt);
+	if (castedToInt > MIN_ASCII_VALUE
+		&& castedToInt < MAX_ASCII_VALUE) {
+		std::cout << "char: '" << castedToChar << "'"
+				  << std::endl;
+	} else {
+		std::cout << "char: Non displayable" << std::endl;
+	}
+	if (result > INT_MIN && result < INT_MAX) {
+		std::cout << "int: '" << castedToInt << "'" << std::endl;
+	} else {
+		std::cout << "int: impossible" << std::endl;
+	}
 	std::cout << std::fixed
 			  << std::setprecision(static_cast<int>(length))
 			  << "float: " << result << 'f' << std::endl;
@@ -137,20 +144,49 @@ void ScalarConverter::displayDouble(
 		std::cout << "double: nan" << std::endl;
 		return;
 	}
-	double new_double = std::atof((to_convert).c_str());
+	double new_double = strtod(to_convert.c_str(), NULL);
+	std::cout << new_double << std::endl;
 	if (new_double >= std::numeric_limits<double>::max()
 		|| new_double <= -std::numeric_limits<double>::max()) {
-		std::cout << "double: Number to convert is too big or "
-					 "too small"
+		std::cout << "double: Out of Range" << std::endl;
+		return;
+	}
+	double             result = NAN;
+	std::istringstream from_str(to_convert);
+	from_str >> result;
+	size_t      dotIndex = to_convert.find('.');
+	std::string afterDot;
+	size_t      length = 1;
+	afterDot           = to_convert.substr(dotIndex + 1);
+	length             = afterDot.length();
+	if (afterDot[length - 1] == 'f') {
+		length--;
+	}
+	int  castedToInt  = static_cast<int>(result);
+	char castedToChar = static_cast<char>(castedToInt);
+	if (castedToInt > MIN_ASCII_VALUE
+		&& castedToInt < MAX_ASCII_VALUE) {
+		std::cout << "char: '" << castedToChar << "'"
 				  << std::endl;
-		return;
+	} else {
+		std::cout << "char: Non displayable" << std::endl;
 	}
-	if (!_isDigit && to_convert.length() == 1) {
-		new_double = static_cast<double>(to_convert[0]);
-	} else if (!_isDigit && to_convert.length() > 1) {
-		std::cout << "double: Non displayable" << std::endl;
-		return;
+	if (result > INT_MIN && result < INT_MAX) {
+		std::cout << "int: '" << castedToInt << "'" << std::endl;
+	} else {
+		std::cout << "int: impossible" << std::endl;
 	}
+	if (result < std::numeric_limits<float>::max()
+		&& result > -std::numeric_limits<float>::min()) {
+		std::cout << std::fixed
+				  << std::setprecision(static_cast<int>(length))
+				  << "float: " << new_double << 'f' << std::endl;
+	} else {
+		std::cout << "float: impossible" << std::endl;
+	}
+	std::cout << std::fixed
+			  << std::setprecision(static_cast<int>(length))
+			  << "double: " << new_double << std::endl;
 }
 
 size_t decimalCount(std::string to_convert) {
