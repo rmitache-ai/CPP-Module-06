@@ -1,12 +1,15 @@
 #ifndef SCALAR_CONVERTER_HPP
 #define SCALAR_CONVERTER_HPP
 
+#include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <math.h>
+#include <ostream>
 #include <sstream>
 #include <string>
 
@@ -18,10 +21,13 @@ const int MAX_ASCII_VALUE = 126;
 class ScalarConverter {
 private:
 	bool _isDigit;
+	int  _type;
 	ScalarConverter();
 
 public:
 	~ScalarConverter();
+	ScalarConverter(ScalarConverter& copy);
+	ScalarConverter& operator=(const ScalarConverter& other);
 
 	void displayChar(std::string to_convert) const;
 	void displayInt(std::string to_convert) const;
@@ -31,6 +37,12 @@ public:
 	static void convert(std::string to_convert);
 
 	float getFloat() const;
+	void  setType(std::string to_convert);
+
+	int getType() const;
 };
+
+std::ostream& operator<<(std::ostream&          out,
+						 const ScalarConverter& foo);
 
 #endif
