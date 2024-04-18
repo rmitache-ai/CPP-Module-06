@@ -1,12 +1,15 @@
 #pragma once
 
-#define BASE_HPP
-
-#include <iostream>
+class A;
+class B;
+class C;
 
 class Base {
+private:
 public:
 	virtual ~Base();
 
-	Base* generate(void);
+	static Base* generate(void);
+	static void  identify(Base* p);
+	static void  identify(Base& p);
 };
