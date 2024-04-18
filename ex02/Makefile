@@ -1,5 +1,5 @@
 NAME = base
-CXXFLAGS = -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 CXX = c++
 SRCS = main.cpp Base.cpp A.cpp B.cpp C.cpp
 OBJS = $(SRCS:.cpp=.o)

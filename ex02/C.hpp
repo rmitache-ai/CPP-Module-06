@@ -2,7 +2,4 @@
 
 #include "Base.hpp"
 
-class C : public Base {
-public:
-	;
-};
+class C : public Base {};
