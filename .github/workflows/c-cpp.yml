@@ -1,14 +1,16 @@
-name: Run Multiple Make Commands
+name: C/C++ CI
 
-on:  # Adapt the trigger as needed
+on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build_and_test:
+  build:
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
