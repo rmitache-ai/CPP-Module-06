@@ -24,7 +24,6 @@ jobs:
               make fclean   # Example: Add a 'fclean' target
               make         # Build target
               make fclean
-              make fclean
               make memcheck
               # Add more 'make' commands if needed 
             fi
