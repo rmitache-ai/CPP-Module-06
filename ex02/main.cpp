@@ -20,7 +20,7 @@ Base* generate(void) {
 		return (new C());
 		break;
 	default:
-		std::cout << "Failed to randomize" << std::endl;
+		std::cerr << "Failed to randomize" << std::endl;
 		return (NULL);
 	}
 }
@@ -91,10 +91,14 @@ int main() {
 		if (Test == NULL) {
 			return (1);
 		}
+		std::cout << "--------- Testing with Pointer! ---------"
+				  << std::endl;
 		identify(Test);
-		std::cout << "XXXXXXXXXXXXXXXXXXXXXXXX\n";
+		std::cout << std::endl;
+		std::cout
+			<< "--------- Testing with Reference! ---------"
+			<< std::endl;
 		identify(*Test);
-		std::cout << "XXXXXXXXXXXXXXXXXXXXXXXX\n";
 
 		delete (Test);
 

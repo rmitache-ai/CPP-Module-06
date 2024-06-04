@@ -28,7 +28,7 @@ private:
 
 public:
 	~ScalarConverter();
-	ScalarConverter(ScalarConverter& copy);
+	ScalarConverter(const ScalarConverter& copy);
 	ScalarConverter& operator=(const ScalarConverter& other);
 
 	void displayChar(std::string to_convert) const;

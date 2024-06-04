@@ -16,16 +16,18 @@ ScalarConverter::~ScalarConverter() {
 			  << std::endl;
 }
 
-ScalarConverter::ScalarConverter(ScalarConverter& copy)
+ScalarConverter::ScalarConverter(const ScalarConverter& copy)
 	: _isDigit(copy._isDigit), _type(copy._type) {
-
-	std::cout << "Copy constructor called of Animal"
+	std::cout << "Copy constructor called of ScalarConverter"
 			  << std::endl;
 }
 
 ScalarConverter&
 ScalarConverter::operator=(const ScalarConverter& other) {
-	_type = other._type;
+	if (this != &other) {
+		_isDigit = other._isDigit;
+		_type    = other._type;
+	}
 	return *this;
 }
 
