@@ -65,6 +65,16 @@ void ScalarConverter::displayChar(std::string to_convert) const {
 }
 
 void ScalarConverter::displayInt(std::string to_convert) const {
+	for (size_t i = 0; i < to_convert.size(); i++)
+	{
+		if (!isdigit(to_convert[i])){
+				std::cout << to_convert
+				  << ", cannot be converted since is neither "
+					 "char, int, float or double! "
+				  << std::endl;
+				  return;
+		}
+	}
 	long new_int = std::atol(to_convert.c_str());
 	if (new_int > std::numeric_limits<int>::max()
 		|| new_int < -std::numeric_limits<int>::max()) {
@@ -153,50 +163,83 @@ bool ScalarConverter::checkDoubleNanInf(
 }
 
 void ScalarConverter::displayFloat(
-	std::string to_convert) const {
+    std::string to_convert) const {
+	for (size_t i = 0; i < to_convert.size(); i++)
+	{
+		if (!isdigit(to_convert[i]) && to_convert[i] != 'f' && to_convert[i] != 'F' && to_convert[i] != '.') {
+					std::cout << to_convert
+					<< ", cannot be converted since is neither "
+						"char, int, float or double! "
+					<< std::endl;
+					return;
+			}
+		if (i + 1 == to_convert.size()){
+			if (to_convert[i - 1] == '.'){
+									std::cout << to_convert
+					<< ", cannot be converted since is neither "
+						"char, int, float or double! "
+					<< std::endl;
+					return;
+			}
+		}
+	}
+    if (checkFloatNanInff(to_convert)) {
+        return;
+    }
+    if (to_convert.back() == 'f' || to_convert.back() == 'F') {
+        to_convert.pop_back();
+    }
+    float new_float = std::atof(to_convert.c_str());
+    if (new_float >= MAXFLOAT || new_float <= -MAXFLOAT) {
+        std::cout << "float: Out of Range" << std::endl;
+        return;
+    }
+    double result = NAN;
+    std::istringstream from_str(to_convert);
+    from_str >> result;
+    size_t dotIndex = to_convert.find('.');
+    std::string afterDot;
+    size_t length = 1;
+    if (dotIndex != std::string::npos) {
+        afterDot = to_convert.substr(dotIndex + 1);
+        length = afterDot.length();
+    }
 
-	if (checkFloatNanInff(to_convert)) {
-		return;
-	}
-	float new_float = std::atof((to_convert).c_str());
-	if (new_float >= MAXFLOAT || new_float <= -MAXFLOAT) {
-		std::cout << "float: Out of Range" << std::endl;
-		return;
-	}
-	double             result = NAN;
-	std::istringstream from_str(to_convert);
-	from_str >> result;
-	size_t      dotIndex = to_convert.find('.');
-	std::string afterDot;
-	size_t      length = 1;
-	afterDot           = to_convert.substr(dotIndex + 1);
-	length             = afterDot.length();
-	if (afterDot[length - 1] == 'f') {
-		length--;
-	}
-	int    castedToInt    = static_cast<int>(result);
-	char   castedToChar   = static_cast<char>(castedToInt);
-	double castedToDouble = static_cast<double>(result);
-	if (castedToInt > MIN_ASCII_VALUE
-		&& castedToInt < MAX_ASCII_VALUE) {
-		std::cout << "char: '" << castedToChar << "'"
-				  << std::endl;
-	} else {
-		std::cout << "char: Non displayable" << std::endl;
-	}
-	if (result > INT_MIN && result < INT_MAX) {
-		std::cout << "int: '" << castedToInt << "'" << std::endl;
-	} else {
-		std::cout << "int: impossible" << std::endl;
-	}
-	std::cout << std::fixed
-			  << std::setprecision(static_cast<int>(length))
-			  << "float: " << result << 'f' << std::endl;
-	std::cout << "double: " << castedToDouble << std::endl;
+    int castedToInt = static_cast<int>(result);
+    char castedToChar = static_cast<char>(castedToInt);
+    double castedToDouble = static_cast<double>(result);
+
+    if (castedToInt > MIN_ASCII_VALUE && castedToInt < MAX_ASCII_VALUE) {
+        std::cout << "char: '" << castedToChar << "'" << std::endl;
+    } else {
+        std::cout << "char: Non displayable" << std::endl;
+    }
+
+    if (result > INT_MIN && result < INT_MAX) {
+        std::cout << "int: '" << castedToInt << "'" << std::endl;
+    } else {
+        std::cout << "int: impossible" << std::endl;
+    }
+
+    std::cout << std::fixed
+              << std::setprecision(static_cast<int>(length))
+              << "float: " << result << 'f' << std::endl;
+    std::cout << "double: " << castedToDouble << std::endl;
 }
+
 
 void ScalarConverter::displayDouble(
 	std::string to_convert) const {
+	for (size_t i = 0; i < to_convert.size(); i++)
+	{
+    if (!isdigit(to_convert[i]) && to_convert[i] != 'f' && to_convert[i] != 'F' && to_convert[i] != '.') {
+				std::cout << to_convert
+				  << ", cannot be converted since is neither "
+					 "char, int, float or double! "
+				  << std::endl;
+				  return;
+		}
+	}
 	if (static_cast<bool>(checkDoubleNanInf(to_convert))) {
 		return;
 	}
@@ -283,12 +326,11 @@ void ScalarConverter::setType(std::string to_convert) {
 		return;
 	}
 	if (_isDigit
-		&& (to_convert.find(".") == std::string::npos)) {
+		&& (to_convert.find(".") == std::string::npos && to_convert.find("f") == std::string::npos)) {
 		_type = 1;
 		return;
 	}
-	if ((to_convert.find("f") != std::string::npos
-		 && to_convert.find(".") != std::string::npos)
+	if (((to_convert.find("f") != std::string::npos) || (to_convert.find("F") != std::string::npos))
 		|| to_convert == "nanf" || to_convert == "inff"
 		|| to_convert == "-inff" || to_convert == "+inff") {
 		_type = 2;
@@ -319,6 +361,7 @@ void ScalarConverter::convert(std::string to_convert) {
 
 	converter.checkIfDigit(to_convert);
 	converter.setType(to_convert);
+
 	switch (converter._type) {
 	case 0:
 		converter.displayChar(to_convert);
