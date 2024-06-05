@@ -65,16 +65,6 @@ void ScalarConverter::displayChar(std::string to_convert) const {
 }
 
 void ScalarConverter::displayInt(std::string to_convert) const {
-	for (size_t i = 0; i < to_convert.size(); i++)
-	{
-		if (!isdigit(to_convert[i])){
-				std::cout << to_convert
-				  << ", cannot be converted since is neither "
-					 "char, int, float or double! "
-				  << std::endl;
-				  return;
-		}
-	}
 	long new_int = std::atol(to_convert.c_str());
 	if (new_int > std::numeric_limits<int>::max()
 		|| new_int < -std::numeric_limits<int>::max()) {
@@ -164,39 +154,25 @@ bool ScalarConverter::checkDoubleNanInf(
 
 void ScalarConverter::displayFloat(
     std::string to_convert) const {
-	for (size_t i = 0; i < to_convert.size(); i++)
-	{
-		if (!isdigit(to_convert[i]) && to_convert[i] != 'f' && to_convert[i] != 'F' && to_convert[i] != '.') {
-					std::cout << to_convert
-					<< ", cannot be converted since is neither "
-						"char, int, float or double! "
-					<< std::endl;
-					return;
-			}
-		if (i + 1 == to_convert.size()){
-			if (to_convert[i - 1] == '.'){
-									std::cout << to_convert
-					<< ", cannot be converted since is neither "
-						"char, int, float or double! "
-					<< std::endl;
-					return;
-			}
-		}
-	}
     if (checkFloatNanInff(to_convert)) {
         return;
     }
+
+    // Strip the 'f' suffix if present
     if (to_convert.back() == 'f' || to_convert.back() == 'F') {
         to_convert.pop_back();
     }
+
     float new_float = std::atof(to_convert.c_str());
     if (new_float >= MAXFLOAT || new_float <= -MAXFLOAT) {
         std::cout << "float: Out of Range" << std::endl;
         return;
     }
+
     double result = NAN;
     std::istringstream from_str(to_convert);
     from_str >> result;
+
     size_t dotIndex = to_convert.find('.');
     std::string afterDot;
     size_t length = 1;
@@ -227,19 +203,8 @@ void ScalarConverter::displayFloat(
     std::cout << "double: " << castedToDouble << std::endl;
 }
 
-
 void ScalarConverter::displayDouble(
 	std::string to_convert) const {
-	for (size_t i = 0; i < to_convert.size(); i++)
-	{
-    if (!isdigit(to_convert[i]) && to_convert[i] != 'f' && to_convert[i] != 'F' && to_convert[i] != '.') {
-				std::cout << to_convert
-				  << ", cannot be converted since is neither "
-					 "char, int, float or double! "
-				  << std::endl;
-				  return;
-		}
-	}
 	if (static_cast<bool>(checkDoubleNanInf(to_convert))) {
 		return;
 	}
@@ -301,9 +266,11 @@ bool ScalarConverter::specialCases(std::string to_convert) {
 		return true;
 	}
 	if (countValue(to_convert, 'f') > 1) {
-		std::cout << "Multiple floating points found\n";
-		_type = -1;
-		return true;
+		if (to_convert != "-inff" && to_convert != "+inff" && to_convert != "inff"){
+			std::cout << "Multiple floating points found\n";
+			_type = -1;
+			return true;
+		}
 	}
 	if (to_convert[to_convert.length() - 1] == '.') {
 		std::cout << "Error: Double needs to have a number "
@@ -316,6 +283,10 @@ bool ScalarConverter::specialCases(std::string to_convert) {
 }
 
 void ScalarConverter::setType(std::string to_convert) {
+const std::string ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const std::string FALPHABET = "abcdeghijklmnopqrstuvwxyzABCDEGHIJKLMNOPQRSTUVWXYZ";
+
+
 
 	if (specialCases(to_convert)) {
 		_type = -1;
@@ -325,17 +296,12 @@ void ScalarConverter::setType(std::string to_convert) {
 		_type = 0;
 		return;
 	}
-	if (_isDigit
-		&& (to_convert.find(".") == std::string::npos && to_convert.find("f") == std::string::npos)) {
-		_type = 1;
-		return;
-	}
-	if (((to_convert.find("f") != std::string::npos) || (to_convert.find("F") != std::string::npos))
-		|| to_convert == "nanf" || to_convert == "inff"
-		|| to_convert == "-inff" || to_convert == "+inff") {
-		_type = 2;
-		return;
-	}
+if (_isDigit && 
+    (to_convert.find('.') == std::string::npos) && 
+    (to_convert.find_first_of(ALPHABET) == std::string::npos)) {
+    _type = 1;
+    return;
+}
 	if ((to_convert.find(".") != std::string::npos
 		 && to_convert.find("f") == std::string::npos)
 		|| to_convert == "nan" || to_convert == "inf"
@@ -343,6 +309,19 @@ void ScalarConverter::setType(std::string to_convert) {
 		_type = 3;
 		return;
 	}
+if ((to_convert.find("f") != std::string::npos ||
+	 to_convert.find("F") != std::string::npos) &&
+    (to_convert.back() == 'f' || to_convert.back() == 'F') &&
+    (to_convert.find_first_of(FALPHABET) == std::string::npos) &&
+	 to_convert[to_convert.length() - 2] != '.') {
+    _type = 2;
+    return;
+}
+if (to_convert == "-inff" || to_convert == "+inff" || to_convert == "inff"
+   || to_convert == "nanf"){
+	_type = 2;
+	return;
+}
 	_type = -1;
 }
 
@@ -352,7 +331,7 @@ void ScalarConverter::checkIfDigit(std::string to_convert) {
 		count++;
 	}
 	if ((isdigit(to_convert[count]) != 0)) {
-		ScalarConverter::_isDigit = true;
+		ScalarConverter::_isDigit = true;	
 	}
 }
 
@@ -361,7 +340,6 @@ void ScalarConverter::convert(std::string to_convert) {
 
 	converter.checkIfDigit(to_convert);
 	converter.setType(to_convert);
-
 	switch (converter._type) {
 	case 0:
 		converter.displayChar(to_convert);

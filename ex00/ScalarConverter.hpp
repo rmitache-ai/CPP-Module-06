@@ -20,6 +20,7 @@ const int MAX_ASCII_VALUE = 126;
 #define DISPLAY_AS_DOUBLE true
 #define DISPLAY_AS_FLOAT false
 
+
 class ScalarConverter {
 private:
 	bool _isDigit;
